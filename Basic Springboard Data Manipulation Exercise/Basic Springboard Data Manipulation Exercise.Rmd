@@ -1,0 +1,97 @@
+---
+title: "Basic Springboard Data Manipulation Exercise"
+author: "Jonathan morken"
+date: "April 7, 2016"
+output: html_document
+---
+
+## Load the Data
+```{r, warning=FALSE, message=FALSE}
+setwd("C:/Users/jmorken/Documents/GitHub/Data Wrangling Projects/Basic Springboard Data Manipulation Exercise")
+
+df <- read.csv("Data/refine_original.csv", sep = ",", header = TRUE)
+df$company <- as.character(df$company)
+df$company <- tolower(df$company)
+df$Product.code...number <- as.character(df$Product.code...number)
+df$address <- as.character(df$address)
+df$city <- as.character(df$city)
+df$country <- as.character(df$country)
+df$name <- as.character(df$name)
+```
+
+## Clean up Brand Names
+Clean up the 'company' column, so all of the misspellings of the brand names are standardized. For example, you can transform the values in the column to be: philips, akzo, van houten and unilever (all lowercase).
+```{r, warning=FALSE, message=FALSE}
+# Load the libraries
+library(dplyr)
+library(tidyr)
+
+#Add Company Key
+companies <- c("philips", "akzo", "van houten","unilever")
+companies <- as.data.frame(companies)
+companies$companies <- as.character(companies$companies)
+
+#install.packages(stringdist)
+library(stringdist)
+
+# Map messy company character strings to standard versions.
+d <- expand.grid(unique(df$company),companies$companies, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE) # Create long form of original vs. key
+names(d) <- c("company","b_name")  # Name the columns
+d$dist <- stringdist(d$company,d$b_name, method="jw")  # Calculate fit 
+d <-do.call(rbind, unname(by(d, d$company, function(x) x[x$dist == min(x$dist),])))  # Reduce to best fit
+
+# Join created data frame with original, re-map company and get rid of b_name column.
+df <- left_join(df, d, by = "company")
+df$company <- df$b_name
+df <- df[,c(1:6)]
+```
+
+## Separate product code and number
+Separate the product code and product number into separate columns i.e. add two new columns called product_code and product_number, containing the product code and number respectively
+```{r, warning=FALSE, message=FALSE}
+df <- df %>%
+  separate(Product.code...number, c("product_code", "product_number"), sep = "\\-")
+```
+
+## Add product categories
+You learn that the product codes actually represent the following product categories:
+*  p = Smartphone
+*  v = TV
+*  x = Laptop
+*  q = Tablet
+
+In order to make the data more readable, add a column with the product category for each record.
+```{r, warning=FALSE, message=FALSE}
+product_codes <- data.frame(product_code = c("p", "v", "x","q"), product_category = c("Smartphone","TV","Laptop","Tablet"))
+
+df <- left_join(df,product_codes)
+```
+
+## Add full address for geocoding
+You'd like to view the customer information on a map. In order to do that, the addresses need to be in a form that can be easily geocoded. Create a new column full_address that concatenates the three address fields (address, city, country), separated by commas.
+```{r, warning=FALSE, message=FALSE}
+df <- unite(df, full_address, address, city, country, sep = ",", remove = FALSE)
+```
+
+## Create dummy variables for company and product category
+Both the company name and product category are categorical variables i.e. they take only a fixed set of values. In order to use them in further analysis you need to create dummy variables. Create dummy binary variables for each of them with the prefix company_ and product_ i.e.
+*  Add four binary (1 or 0) columns for company
+*  Add four binary (1 or 0) columns for product category
+
+```{r, warning=FALSE, message=FALSE}
+#company variables
+df <- df %>%
+  mutate(company = paste("company", company, sep = "_"), yesno = 1) %>%
+  distinct %>%
+  spread(company, yesno, fill = 0)
+#category variables
+df <- df %>%
+  mutate(product_category = paste("product", product_category, sep = "_"), yesno = 1) %>%
+  distinct %>%
+  spread(product_category, yesno, fill = 0)
+```
+
+## Create final CSV
+```{r, warning=FALSE, message=FALSE}
+write.csv(df, file = "data/refine_clean.csv",row.names = FALSE)
+```

@@ -1,0 +1,25 @@
+{
+    "contents" : "",
+    "created" : 1460129717514.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "67F85A91",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "zvi7kwz8fj",
+        "caption" : "dreplace",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=dreplace&cache_key=zvi7kwz8fj",
+        "displayedObservations" : 25,
+        "environment" : "",
+        "object" : "dreplace",
+        "totalObservations" : 25,
+        "variables" : 2
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}

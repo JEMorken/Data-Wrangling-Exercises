@@ -1,0 +1,18 @@
+{
+    "contents" : "",
+    "created" : 1460127754179.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "95B07767",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "context" : ".GlobalEnv:::greedyAssign"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "type" : "r_code_browser"
+}

@@ -1,0 +1,18 @@
+{
+    "contents" : "---\ntitle: \"Basic Springboard Data Manipulation Exercise\"\nauthor: \"Jonathan morken\"\ndate: \"April 7, 2016\"\noutput: html_document\n---\n\nRead in the Data\n\n```{r}\nsetwd(\"C:/Users/jmorken/Documents/GitHub/Data Wrangling Projects/Basic Springboard Data Manipulation Exercise\")\n\ndf <- read.csv(\"Data/refine.csv\", sep = \",\", header = TRUE)\ndf$company <- as.character(df$company)\ndf$company <- tolower(df$company)\ndf$Product.code...number <- as.character(df$Product.code...number)\ndf$address <- as.character(df$address)\ndf$city <- as.character(df$city)\ndf$country <- as.character(df$country)\ndf$name <- as.character(df$name)\n\nsummary(df)\n```\n\n```{r}\n# View the data\nView(df)\n\n# Load the libraries\nlibrary(dplyr)\nlibrary(tidyr)\n\ncompanies <- c(\"philips\", \"akzo\", \"van houten\",\"unilever\")\ncompanies <- as.data.frame(companies)\ncompanies$companies <- as.character(companies$companies)\n\n#install.packages(stringdist)\nlibrary(stringdist)\n\nd <- expand.grid(df$company,companies$companies, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE) # Create long form of original vs. key\nnames(d) <- c(\"company\",\"b_name\")\nd$dist <- stringdist(d$company,d$b_name, method=\"jw\")  \n\nd <-do.call(rbind, unname(by(d, d$company, function(x) x[x$dist == min(x$dist),])))\n\n# Join creates data frame with 83 observations when both of the others only have 25.  Why???\ndf2 <- left_join(df, d, by = \"company\")\n\n\n\n```",
+    "created" : 1460058071142.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1545098079",
+    "id" : "D7234F98",
+    "lastKnownWriteTime" : 1460132972,
+    "path" : "~/GitHub/Data Wrangling Projects/Basic Springboard Data Manipulation Exercise/Basic Springboard Data Manipulation Exercise.Rmd",
+    "project_path" : "Basic Springboard Data Manipulation Exercise.Rmd",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "type" : "r_markdown"
+}
