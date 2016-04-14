@@ -5,6 +5,9 @@ date: "April 9, 2016"
 output: html_document
 ---
 
+Note, original instructions appear after each header.  My responses (where applicable) appear below each section of code.
+
+
 ## Load the Data
 ```{r, warning=FALSE, message=FALSE}
 setwd("C:/Users/jmorken/Documents/GitHub/Data-Wrangling-Exercises/Second Springboard Data Manipulation Exercise")
@@ -84,7 +87,7 @@ titanic_df  <- titanic_df  %>%
         ifelse(is.na(cabin), 0, 1)
             )
         )
-titanic_df
+summary(titanic_df)
 
 #Basic check to see if having a cabin number equates to a higher survival rate
 titanic_df2 <- group_by(titanic_df,has.cabin.number) %>%
