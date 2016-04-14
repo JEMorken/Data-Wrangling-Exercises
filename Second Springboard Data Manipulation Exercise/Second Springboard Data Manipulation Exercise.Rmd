@@ -1,0 +1,101 @@
+---
+title: "Second Springboard Data Manipulation Exercise"
+author: "Jonathan morken"
+date: "April 9, 2016"
+output: html_document
+---
+
+## Load the Data
+```{r, warning=FALSE, message=FALSE}
+setwd("C:/Users/jmorken/Documents/GitHub/Data-Wrangling-Exercises/Second Springboard Data Manipulation Exercise")
+
+titanic_df <- read.csv("Data/titanic_original.csv", sep = ",", header = TRUE, na.strings = "")
+
+# Remove one completely NA row and change columns to string where appropriate
+titanic_df <- subset(titanic_df,!is.na(titanic_df$pclass))
+
+str(titanic_df)
+
+```
+
+## Port of Embarkation
+The embarked column has one missing value, which is known to correspond to a passenger who actually embarked at Southampton. Find the missing value and replace it with S.
+```{r, warning=FALSE, message=FALSE}
+# Load the libraries
+library(dplyr)
+library(tidyr)
+
+#Make embarked a character vector and then switch it back to a factor.
+titanic_df$embarked <- as.character(titanic_df$embarked)
+titanic_df$embarked[is.na(titanic_df$embarked)] <- c("S")
+titanic_df$embarked <- as.factor(titanic_df$embarked)
+
+#df <- df[,c(1:6)]
+```
+There were actually two left blank, Icard, Miss. Amelie and Stone, Mrs. George Nelson (Martha Evelyn). I replaced the blank in both with s.
+
+
+## Age
+You’ll notice that a lot of the values in the Age column are missing. While there are many ways to fill these missing values, using the mean or median of the rest of the values is quite common in such cases.
+*  Calculate the mean of the Age column and use that value to populate the missing values.
+*  Think about other ways you could have populated the missing values in the age column. Why would you pick any of those over the mean (or not)?
+
+```{r, warning=FALSE, message=FALSE}
+#Replace NA's in Age column with mean.
+
+library(ggplot2)
+
+# Overall age mean is 29.88
+summary(titanic_df$age)
+
+#Age appears to vary by class and by gender
+ggplot(data = titanic_df,aes(x = sex, y = age)) +
+  geom_boxplot() +
+  facet_wrap(~ pclass)
+
+#Apply mean by class and gender to NAs
+titanic_df <- titanic_df %>%
+  group_by(pclass, sex) %>% 
+  mutate(age = ifelse(is.na(age), mean(age, na.rm = T), age))
+```
+The above is a better method than simply using an overall average; however, one could also use more complex linear models to fill in the NAs.
+
+
+## Lifeboat
+You’re interested in looking at the distribution of passengers in different lifeboats, but as we know, many passengers did not make it to a boat. This means that there are a lot of missing values in the boat column. Fill these empty slots with a dummy value e.g. NA
+```{r, warning=FALSE, message=FALSE}
+# I filled all missing values with NA when I loaded the data.  However, one could use the following formula:
+
+#titanic_df$boat <- sub("^$", "NA", titanic_df$boat)
+```
+
+## Cabin
+You notice that many passengers don’t have a cabin number associated with them.
+*  Does it make sense to fill missing cabin numbers with a value?
+*  What does a missing value here mean?
+You have a hunch that the fact that the cabin number is missing might be a useful indicator of survival. Create a new column has.cabin.number which has 1 if there is a cabin number, and 0 otherwise.
+
+```{r, warning=FALSE, message=FALSE}
+# the new variable should be a factor, b/c it's categorical.
+titanic_df  <- titanic_df  %>% 
+  mutate(
+    has.cabin.number = 
+      factor(
+        ifelse(is.na(cabin), 0, 1)
+            )
+        )
+titanic_df
+
+#Basic check to see if having a cabin number equates to a higher survival rate
+titanic_df2 <- group_by(titanic_df,has.cabin.number) %>%
+  summarise(Count = n(),
+    SurvivalRate = sum(survived)/Count)
+
+titanic_df2
+```
+I do not think it makes sense to fill in missing cabin numbers; however, assuming cabin numbers were corroborated by survivors, having a cabin number may be somewhat indicative of survival.  Overall, those with cabin numbers have a 65% survival rate while those without have a 30% rate.
+
+
+## Create final CSV
+```{r, warning=FALSE, message=FALSE}
+write.csv(titanic_df, file = "data/titanic_clean.csv",row.names = FALSE)
